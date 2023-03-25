@@ -1,50 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<link rel="stylesheet" href="./style.css">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Níveis - Taxanomia de Bloom</title>
+    <title>Calculadora de Médias</title>
 </head>
 <body>
-    <p style="font-size: 25px; font-weight: bold; text-align: center;">Níveis - Taxonomia de Bloom</p>
-    <script>
-        var colors = [" lightblue", "green", "blue", "orange", "magenta", "red"];
-        let matrizLabels = ["MEMORIZAR","COMPREENDER","APLICAR","ANALISAR","AVALIAR","CRIAR"];
-        let matrizBotoes = [["Listar" , "Esquematizar", "Utilizar", "Resolver", "Defender", "Elaborar" ],
-                            ["Relembrar", "Relacionar", "Implementar", "Categorizar", "Delimitar", "Desenhar"], 
-                            ["Reconhecer", "Explicar", "Modificar", "Diferenciar", "Estimar", "Produzir"], 
-                            ["Identificar", "Demonstrar", "Experimentar", "Comparar", "Selecionar", "Prototipar" ],
-                            ["Localizar", "Parafrasear", "Calcular", "Explicar", "Justificar", "Traçar"], 
-                            ["Descrever", "Associar", "Demonstrar", "Integrar", "Comparar", "Idear"],
-                            ["Citar", "Converter", "Classificar", "Investigar", "Explicar", "Inventar"]];
-        
-        document.write("<table>"); //cria uma tabela
-        document.write("<tr>"); //cria a linha das labels
-        //popula as linhas das labels
-        for (var i = 0; i < matrizLabels.length; i++){
-            document.write("<td  class= labels1 style='color:" + colors[i] + "; font-weight: bold; padding: 30px; text-align:center;'>"); //cria uma celula na tabela
-            document.write(matrizLabels[i]);    
-            document.write("</td>");
-            
-        }
-        document.write("</tr>"); //fecha a linha de labels 
-
-        for (var i = 0; i < matrizBotoes.length; i++){
-            for (var j = 0; j < matrizBotoes[i].length; j++)
-            {
-                
-                // Cria uma celula com um botão da mesma cor da coluna
-                document.write("<td>")
-                document.write("<button style='background-color:"+ colors[j] +"; margin-bottom: 10px; padding: 30px; border-radius: 20px; border: none; box-shadow: 2px 2px 5px #ccc; font-size:18px; text-align:center; width:90%; outline:none; box-sizing:border-box; color:white;'>");
-                document.write(matrizBotoes[i][j]);
-                document.write("</button>"); // Fecha a tag elemento
-                document.write("</td>") //Fecha a celula
-            }
-            document.write("</tr>"); //Fecha a linha
+    <div class="titulo">
+        <h1>Turma QUA.315.030</h1>
+        <h1> Desenvolvedor C#</h1>
+    </div>
+    <p id="cadastro"></p>
+    <h3><u>Lista de Alunos</u></h3>
+    <div id="menu">
+        <select id="listaAlunos" onchange="mostraAluno()">
+            <option value="1"></option>
+        </select>
+        <div id="menuNotas">
+        </div>
+    </div>
     
+    <div class="container">
+
+        
+        <table>
+            <tr>
+                <button onClick="mostraCadastro()">Registrar Aluno</button>
+                <button onClick="gravaNota()">Gravar Nota</button>
+            </tr>
+        </table>
+        
+        
+    </div>
+    <h2 id="resultado"></h2>
+    <script>
+        // Cria um classe usando a palavra reservada class
+        class Aluno { // create a constructor method that takes two parameters: name and grades 
+            constructor(nome, notas) { // assign the parameters to the properties of the object using the this keyword 
+                this.nome = nome; 
+                this.notas = notas; } 
+            }
+        var alunos = [];
+        function mostraCadastro(){
+            document.getElementById("cadastro").innerHTML = '<input type="text" id="nome" placeholder="Digite o nome do aluno"></input>\
+                                                             <button onClick="gravaAluno()">GRAVAR</button>';
         }
-        document.write("</table>")//Fecha a tabela
-      </script>  
+        function adicionaAluno(nomeAluno){
+            var select = document.getElementById("listaAlunos");
+            var option = document.createElement("option");
+            option.text = nomeAluno;
+            select.add(option);
+        }
+        function gravaAluno(){
+            var nome = document.getElementById("nome").value;
+            var notas = []; 
+            alunos.push(new Aluno(nome,notas))
+            document.getElementById("cadastro").innerHTML = "";
+            adicionaAluno(nome); 
+        }
+        function mostraAluno(){
+            var select = document.getElementById("listaAlunos");
+            var option = select.options[select.selectedIndex];
+            var nome = option.text;
+            var indice = alunos.findIndex(function(elemento){return elemento.nome === nome});
+            var notas = alunos[indice].notas;
+            var soma = notas.reduce((acumulador, atual) => acumulador + atual, 0);
+            var media = soma / 4;
+            var resultado = document.getElementById("resultado")
+            resultado.innerHTML = `<h2>${nome}</h2><br>\
+                                   <table style=“border: 5px solid black;”>
+                                        <tr style=“border: 5px solid black;>
+                                            <td style=“border: 5px solid black;>Nota 1</td>
+                                            <td style=“border: 5px solid black;>Nota 2</td>
+                                            <td style=“border: 5px solid black;>Nota 3</td>
+                                            <td style=“border: 5px solid black;>Nota 4</td>
+                                        </tr>
+                                        <tr style=“border: 5px solid black;>
+                                            <td id="nota1">${notas[0]}</td>
+                                            <td id="nota2">${notas[1]}</td>
+                                            <td id="nota3">${notas[2]}</td>
+                                            <td id="nota4">${notas[3]}</td>
+                                        </tr>
+                                        <tr style=“border: 5px solid black;>
+                                            <td>MÉDIA</td>
+                                            <td>${media}</td>
+                                        </tr>
+                                   </table>`;
+        }
+        function gravaNota() {
+            var div = document.getElementById('menuNotas');
+            div.innerHTML = `
+                                <select id="avaliacao">
+                                <option value=1>Nota 1</option>
+                                <option value=1>Nota 2</option>
+                                <option value=1>Nota 3</option>
+                                <option value=1>Nota 4</option>
+                                </select>
+                                <input type="text" id="campoNota" placeholder="Digite a nota"></input>\
+                                <button onClick="guardaNota()">GRAVAR</button>'
+                            `;        
+        }
+        function guardaNota(){
+            var select = document.getElementById("avaliacao");
+            var indiceAvaliacao = select.selectedIndex;
+            select = document.getElementById("listaAlunos");
+            var option = select.options[select.selectedIndex];
+            var nome = option.text;
+            var indiceAluno = alunos.findIndex(function(elemento){return elemento.nome === nome});
+            var nota = parseInt(document.getElementById("campoNota").value);
+            alunos[indiceAluno].notas[indiceAvaliacao] = nota;
+            var div = document.getElementById('menuNotas');
+            div.innerHTML = "";
+            mostraAluno();
+
+
+        }
+        function calcularMedia() {
+            var soma = notas.reduce(function (acumulador, elemento) { return acumulador + elemento },0);
+            var media = soma / notas.length;
+            document.getElementById('resultado').innerHTML = "A média é: " + media;
+        }
+
+     
+    </script>
 </body>
 </html>
