@@ -8,18 +8,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Médias</title>
 </head>
-<body>
+<body onload="leCookies()">
     <div class="titulo">
         <h1>Turma QUA.315.030</h1>
         <h1> Desenvolvedor C#</h1>
     </div>
-    <p id="cadastro"></p>
+    
+    <div id="cadastro" style="display: none;">
+        <input type="text" id="nome" placeholder="Digite o nome do aluno"></input>
+        <br><input type="email" id="email" placeholder="Digite o email"></input>
+        <br><input type=text id="endereco" placeholder="Digite o endereço"></input>
+        <br><input type="number" id="cep" placeholder="Digite o cep"></input>
+        <br><input type="number" id="cpf" placeholder="Digite o cpf"></input>
+        <br><input type="date" id="dataDeNascimento" placeholder="Data de nascimento"></input>
+        <br><select id="cursos">
+            <option value=1>C#</option>
+            <option value=2>Java</option>
+            <option value=3>Excel</option>
+        </select>
+         <button onClick="gravaAluno()">GRAVAR</button>'
+    </div>
     <h3><u>Lista de Alunos</u></h3>
     <div id="menu">
         <select id="listaAlunos" onchange="mostraAluno()">
             <option value="1"></option>
         </select>
-        <div id="menuNotas">
+        <div id="menuNotas" style="display: none;">
+            <select id="avaliacao">
+                <option value=1>Nota 1</option>
+                <option value=2>Nota 2</option>
+                <option value=3>Nota 3</option>
+                <option value=4>Nota 4</option>
+                </select>
+                <input type="text" id="campoNota" placeholder="Digite a nota"></input>
+                <button onClick="guardaNota()">GRAVAR</button>'
         </div>
     </div>
     
@@ -30,23 +52,64 @@
             <tr>
                 <button onClick="mostraCadastro()">Registrar Aluno</button>
                 <button onClick="gravaNota()">Gravar Nota</button>
+                <button onClick="criarCurso()">Criar Curso</button>
             </tr>
         </table>
         
         
     </div>
-    <h2 id="resultado"></h2>
+    <div id="resultado" style="display: none;"></div>
     <script>
+
         // Cria um classe usando a palavra reservada class
-        class Aluno { // create a constructor method that takes two parameters: name and grades 
-            constructor(nome, notas) { // assign the parameters to the properties of the object using the this keyword 
-                this.nome = nome; 
-                this.notas = notas; } 
+        class Cursos{
+            constructor(nome, professor, horario, id){
+                this.nome = nome;
+                this.professor = professor;
+                this.horario = horario;
+                this.id = id;
             }
-        var alunos = [];
+            toHtmlOption()
+            {
+                return "<option value="+cursoId+">"+this.nome+"</option>";
+            }
+
+            }
+
+        class Pessoa{
+            constructor(nome, email, endereco, cep, cpf, dataDeNascimento)
+            {
+                this.nome = nome;
+                this.email = email;
+                this.endereco = endereco;
+                this.cep = cep;
+                this.cpf = cpf;
+                this.dataDeNascimento = dataDeNascimento;
+            }
+        }
+        class Professor extends Pessoa{
+            constructor(nome, email, endereco, cep, cpf, dataDeNascimento,salario, cursos)
+            {
+                super(nome,email,endereco,cep,cpf,dataDeNascimento)
+                this.salario = salario;
+                this.cursos = cursos;
+            }
+        }
+        class Aluno extends Pessoa{ 
+            constructor(nome, email, endereco, cep, cpf, dataDeNascimento,cursos, notas) 
+            { 
+                super(nome,email,endereco,cep,cpf,dataDeNascimento)
+                this.cursos = cursos;
+                this.notas = notas;
+             } 
+            }
+        //cria o dicionario vazio alunos
+        let alunos = {};
+
+        
+
         function mostraCadastro(){
-            document.getElementById("cadastro").innerHTML = '<input type="text" id="nome" placeholder="Digite o nome do aluno"></input>\
-                                                             <button onClick="gravaAluno()">GRAVAR</button>';
+            document.getElementById("cadastro").style.display = "block";
         }
         function adicionaAluno(nomeAluno){
             var select = document.getElementById("listaAlunos");
@@ -55,22 +118,82 @@
             select.add(option);
         }
         function gravaAluno(){
-            var nome = document.getElementById("nome").value;
-            var notas = []; 
-            alunos.push(new Aluno(nome,notas))
-            document.getElementById("cadastro").innerHTML = "";
-            adicionaAluno(nome); 
+            //lista as propriedades da classe Aluno
+            var properties = Object.keys(new Aluno)
+            let propertiesDict = {}; 
+            console.log(properties)
+            //Popula o dicionário com as informações pegas do formulário
+            properties.forEach(element => {
+                try {
+                    var campo = document.getElementById(element).value;
+                    propertiesDict[element] = document.getElementById(element).value; 
+                }
+                catch{
+                    console.log("Erro")
+                    console.log(element);
+                    console.log(propertiesDict[element]);
+                }
+                
+            });
+            
+            var notas = [];
+            //Cria um nova instância de aluno com as informações do dicionário e salva na lista de alunos 
+            alunos[propertiesDict["nome"]] = new Aluno(propertiesDict["nome"], propertiesDict["email"], propertiesDict["endereco"], propertiesDict["cep"], propertiesDict["cpf"], propertiesDict["dataDeNascimento"],propertiesDict["cursos"],notas);
+            //esconde o a formulário de cadastro
+            document.getElementById("cadastro").style.display = "none";
+            //Adiciona o aluno a lista mostrada ao usuário
+            adicionaAluno(propertiesDict["nome"]);
+            //Grava a informação no cookie
+            document.cookie = "meusAlunos=" + JSON.stringify(alunos);
+ 
         }
         function mostraAluno(){
             var select = document.getElementById("listaAlunos");
             var option = select.options[select.selectedIndex];
             var nome = option.text;
-            var indice = alunos.findIndex(function(elemento){return elemento.nome === nome});
-            var notas = alunos[indice].notas;
+            var notas = alunos[nome].notas;
             var soma = notas.reduce((acumulador, atual) => acumulador + atual, 0);
             var media = soma / 4;
-            var resultado = document.getElementById("resultado")
-            resultado.innerHTML = `<h2>${nome}</h2><br>\
+            //pega a div resultado
+            var resultado = document.getElementById("resultado");
+            resultado.innerHTML = "";
+            //acha a tag que vai receber o nome do aluno
+            var nomeAluno = document.createElement("h2");
+            //coloca o nome do aluno
+            nomeAluno.innerHTML = nome;
+            resultado.appendChild(nomeAluno);
+            //cria uma tabela
+            var table = document.createElement("table");
+            //cria um cabeçalho
+            var header = table.createTHead();
+            //coloca uma linha no cabeçalho
+            var row = header.insertRow();
+            for (var i = 0; i < 4; i++) 
+            {
+                //insere uma celula 
+                var cell = row.insertCell();
+                cell.innerHTML = "Nota"+(i+1);
+            }
+            //cria o corpo da tabela
+            var body = table.createTBody();
+            //insere uma linha no corpo da tabela
+            var bodyrow = body.insertRow();
+            //popula a linha com 4 celulas e coloca as notas nas celulas
+            for (var i = 0; i < 4; i++)
+            {
+                var cell = bodyrow.insertCell();
+                cell.innerHTML = notas[i];
+            }
+            //cria outra linha no corpo da tabela para a média
+            bodyrow = body.insertRow();
+            cell = bodyrow.insertCell();
+            cell.innerHTML = "MÉDIA";
+            cell = bodyrow.insertCell();
+            cell.innerHTML = media;
+            resultado.appendChild(table);
+            resultado.style.display ="block";
+
+            /* resultado.innerHTML = `<h2 id="nomeAluno">${nome}</h2><br>\
                                    <table style=“border: 5px solid black;”>
                                         <tr style=“border: 5px solid black;>
                                             <td style=“border: 5px solid black;>Nota 1</td>
@@ -88,32 +211,29 @@
                                             <td>MÉDIA</td>
                                             <td>${media}</td>
                                         </tr>
-                                   </table>`;
+                                   </table>`; */
         }
         function gravaNota() {
-            var div = document.getElementById('menuNotas');
-            div.innerHTML = `
-                                <select id="avaliacao">
-                                <option value=1>Nota 1</option>
-                                <option value=1>Nota 2</option>
-                                <option value=1>Nota 3</option>
-                                <option value=1>Nota 4</option>
-                                </select>
-                                <input type="text" id="campoNota" placeholder="Digite a nota"></input>\
-                                <button onClick="guardaNota()">GRAVAR</button>'
-                            `;        
+            //habilita a visualização do cadastro de notas
+            document.getElementById('menuNotas').style.display = "block";
+                    
         }
         function guardaNota(){
+            //pega qual avaliação vai ser atribuida a nota
             var select = document.getElementById("avaliacao");
             var indiceAvaliacao = select.selectedIndex;
+            //pega qual aluno a nota esta sendo atribuida
             select = document.getElementById("listaAlunos");
             var option = select.options[select.selectedIndex];
             var nome = option.text;
-            var indiceAluno = alunos.findIndex(function(elemento){return elemento.nome === nome});
+            //pega o valor digitado da nota
             var nota = parseInt(document.getElementById("campoNota").value);
-            alunos[indiceAluno].notas[indiceAvaliacao] = nota;
-            var div = document.getElementById('menuNotas');
-            div.innerHTML = "";
+            //atualiza o registro do aluno na lista de alunos com a nota
+            alunos[nome].notas[indiceAvaliacao] = nota;
+            //grava no cookie
+            document.cookie = "meusAlunos=" + JSON.stringify(alunos);
+            //desabilita a visualização do cadastro de notas
+            document.getElementById('menuNotas').style.display = "none";
             mostraAluno();
 
 
@@ -123,7 +243,31 @@
             var media = soma / notas.length;
             document.getElementById('resultado').innerHTML = "A média é: " + media;
         }
-
+        function criarCurso(){
+             
+        }
+        function leCookies(){
+            const cookies = document.cookie.split(';').reduce((cookies, cookie) => {
+            const [name, value] = cookie.split('=').map(c => c.trim());
+            try {
+                return Object.assign(cookies, { [name]: JSON.parse(value) });
+            } catch (e) {
+                return cookies;
+            }
+            }, {});
+            //console.log(cookies.meusAlunos);
+            var alunosDict = cookies.meusAlunos;
+            //vai recriar o dicionario de alunos com instancias da classe Aluno
+            Object.keys(alunosDict).forEach(key => 
+            {
+                var aluno = alunosDict[key];
+                alunos[aluno.nome] = new Aluno(aluno.nome,aluno.email,aluno.endereco,aluno.cep,aluno.cpf,aluno.dataDeNascimento,aluno.cursos,aluno.notas);
+                adicionaAluno(aluno.nome);
+            }
+            
+            );
+            
+        }
      
     </script>
 </body>
